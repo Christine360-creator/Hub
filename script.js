@@ -1,1 +1,84 @@
- let currentPage = 1; // Show Page Function function showPage(pageNumber){ document.getElementById("page1").style.display = pageNumber===1?"block":"none"; document.getElementById("page2").style.display = pageNumber===2?"block":"none"; } // Page Rotation setInterval(()=>{ currentPage=currentPage===1?2:1; showPage(currentPage); }, HUB_CONFIG.rotationTime); showPage(currentPage); // -------------------- // Quotes Rotation // -------------------- let quotes=[], currentQuoteIndex=0; async function loadQuotes(){ try{ const res=await fetch(${HUB_CONFIG.quotesFolder}quotes.json); quotes=await res.json(); showQuote(); setInterval(showQuote,HUB_CONFIG.quoteRotationTime); }catch(e){console.error("Quotes load error:",e);} } function showQuote(){ if(!quotes.length) return; document.getElementById("themeHeader").textContent=quotes[currentQuoteIndex]; document.getElementById("themeHeader2").textContent=quotes[currentQuoteIndex]; currentQuoteIndex=(currentQuoteIndex+1)%quotes.length; } // -------------------- // Photos Rotation // -------------------- let photoIndex=0; const photoElements=[document.getElementById("page1Photo"),document.getElementById("page2Photo")]; function rotatePhotos(){ if(!HUB_CONFIG.photos.length) return; setInterval(()=>{ photoElements.forEach(el=>{ el.innerHTML=<img src="${HUB_CONFIG.photosFolder}${HUB_CONFIG.photos[photoIndex]}" style="max-width:100%; max-height:200px;">; }); photoIndex=(photoIndex+1)%HUB_CONFIG.photos.length; },HUB_CONFIG.photoRotationTime); } // -------------------- // Weather // -------------------- async function loadWeather(){ try{ const apiKey=HUB_CONFIG.weatherAPIKey; const location=HUB_CONFIG.location; const res=await fetch(https://api.openweathermap.org/data/2.5/forecast?q=${location}&units=metric&cnt=3&appid=${apiKey}); const data=await res.json(); let forecastHTML=""; data.list.forEach(item=>{ const date=new Date(item.dt*1000); forecastHTML+=<div>${date.toLocaleDateString()} - ${item.weather[0].description}, ${item.main.temp}°C</div>; }); document.getElementById("weather1").innerHTML=forecastHTML; document.getElementById("weather2").innerHTML=forecastHTML; }catch(e){console.error("Weather load error:",e);} } // -------------------- // Calendar // -------------------- async function loadCalendar(){ try{ const res=await fetch(HUB_CONFIG.calendarURL); const data=await res.text(); const events=data.match(/SUMMARY:(.*)/g)||[]; const agendaList=document.getElementById("agendaList"); agendaList.innerHTML=""; events.forEach(ev=>{ const li=document.createElement("li"); li.textContent=ev.replace("SUMMARY:",""); agendaList.appendChild(li); }); }catch(e){console.error("Calendar load error:",e);} } // -------------------- // Meal Plan // -------------------- async function loadMealPlan(){ try{ const res=await fetch(HUB_CONFIG.mealPlanURL); const text=await res.text(); const lines=text.split("\n"); const list=document.getElementById("mealPlanList"); list.innerHTML=""; lines.forEach(line=>{ if(line.trim()) { const li=document.createElement("li"); li.textContent=line; list.appendChild(li); } }); }catch(e){console.error("Meal plan load error:",e);} } // -------------------- // To Do // -------------------- async function loadToDo(){ try{ const res=await fetch(HUB_CONFIG.toDoURL); const data=await res.text(); const tasks=data.match(/SUMMARY:(.*)/g)||[]; const list=document.getElementById("toDoList"); list.innerHTML=""; tasks.forEach(task=>{ const li=document.createElement("li"); li.textContent=task.replace("SUMMARY:",""); list.appendChild(li); }); }catch(e){console.error("To Do load error:",e);} } // -------------------- // Initialize Everything // -------------------- loadQuotes(); rotatePhotos(); loadWeather(); loadCalendar(); loadMealPlan(); loadToDo();
+// ==========================
+// BASIC PAGE ROTATION
+// ==========================
+let currentPage = 1;
+
+function showPage(pageNumber) {
+    const page1 = document.getElementById("page1");
+    const page2 = document.getElementById("page2");
+
+    if (!page1 || !page2) return;
+
+    page1.style.display = pageNumber === 1 ? "block" : "none";
+    page2.style.display = pageNumber === 2 ? "block" : "none";
+}
+
+// Start on page 1
+showPage(currentPage);
+
+// Rotate pages safely
+setInterval(() => {
+    currentPage = currentPage === 1 ? 2 : 1;
+    showPage(currentPage);
+}, HUB_CONFIG.rotationTime || 60000);
+
+// ==========================
+// QUOTES (SAFE)
+// ==========================
+let quotes = [];
+let currentQuoteIndex = 0;
+
+async function loadQuotes() {
+    try {
+        const response = await fetch("quotes/quotes.json");
+        quotes = await response.json();
+        showQuote();
+
+        setInterval(showQuote, HUB_CONFIG.quoteRotationTime || 30000);
+    } catch (err) {
+        console.warn("Quotes not loaded:", err);
+    }
+}
+
+function showQuote() {
+    if (!quotes.length) return;
+
+    const text = quotes[currentQuoteIndex];
+    const h1a = document.getElementById("themeHeader");
+    const h1b = document.getElementById("themeHeader2");
+
+    if (h1a) h1a.textContent = text;
+    if (h1b) h1b.textContent = text;
+
+    currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+}
+
+// ==========================
+// PHOTOS (SAFE)
+// ==========================
+let photoIndex = 0;
+
+function rotatePhotos() {
+    if (!HUB_CONFIG.photos || HUB_CONFIG.photos.length === 0) return;
+
+    const page1Photo = document.getElementById("page1Photo");
+    const page2Photo = document.getElementById("page2Photo");
+
+    setInterval(() => {
+        const photo = HUB_CONFIG.photos[photoIndex];
+        const imgHTML = `<img src="${HUB_CONFIG.photosFolder}${photo}" style="max-width:100%; max-height:200px;">`;
+
+        if (page1Photo) page1Photo.innerHTML = imgHTML;
+        if (page2Photo) page2Photo.innerHTML = imgHTML;
+
+        photoIndex = (photoIndex + 1) % HUB_CONFIG.photos.length;
+    }, HUB_CONFIG.photoRotationTime || 30000);
+}
+
+// ==========================
+// INIT (ONLY SAFE FEATURES)
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+    loadQuotes();
+    rotatePhotos();
+});
