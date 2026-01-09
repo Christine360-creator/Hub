@@ -1,1 +1,18 @@
- const HUB_CONFIG = { rotationTime: 60000, // 1 min per page quoteRotationTime: 30000, // 30 sec photoRotationTime: 30000, // 30 sec themeColor: "#ffffff", fontFamily: "Arial, sans-serif", // Feeds calendarURL: "INSERT_CALENDAR_ICAL_URL_HERE", mealPlanURL: "INSERT_MEAL_PLAN_CSV_URL_HERE", toDoURL: "INSERT_TODO_ICAL_URL_HERE", weatherAPIKey: "INSERT_WEATHER_API_KEY_HERE", location: "City, Country", // Folders photosFolder: "photos/", photos: ["photo1.jpg","photo2.jpg"], // small photos filenames quotesFolder: "quotes/", };
+const HUB_CONFIG = {
+    rotationTime: 60000,
+    quoteRotationTime: 30000,
+    photoRotationTime: 30000,
+    themeColor: "#ffffff",
+    fontFamily: "Arial, sans-serif",
+
+    // DISABLED FEEDS (prevents black screen)
+    calendarURL: "",
+    mealPlanURL: "",
+    toDoURL: "",
+    weatherAPIKey: "",
+    location: "",
+
+    photosFolder: "photos/",
+    photos: [],
+    quotesFolder: "quotes/",
+};
